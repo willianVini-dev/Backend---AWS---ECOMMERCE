@@ -22,6 +22,13 @@ export async function handler(event: APIGatewayProxyEvent, context: Context): Pr
         })
       }
     }
+  }else if( event.resource === '/products/{id}'){
+    console.log(' GET /products/{id}')
+    console.log('ID ->', event.pathParameters!.id as string)
+    return {
+      statusCode: 200,
+      body: "GET /products/{id}"
+    }
   }
 
   return {
