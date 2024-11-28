@@ -9,12 +9,58 @@ export interface Product {
   model: string;
 }
 
-export class ProductRepository{
+export class ProductRepository {
   private ddbClient: DocumentClient
-  private productDdb:string
+  private productDdb: string
 
-  constructor(ddbClient:DocumentClient, productDdb: string){
+  constructor(ddbClient: DocumentClient, productDdb: string) {
     this.ddbClient = ddbClient
     this.productDdb = productDdb
   }
-}
+
+  // metodo scan é muito custoso $, evita-lo
+  // realizando a busca em todos os produtos da tabela
+  async getAllproducts(): Promise<Product[]> {
+    const data = await this.ddbClient.scan({
+      TableName: this.productDdb // deixando dinamico o nome da tabela
+    }).promise()
+
+    return data.Items as Product[]
+  }
+
+  // realizando a busca pelo id do produto
+  async gerproductById(productID: string): Promise<Product> {
+    const data = await this.ddbClient.get({
+      TableName: this.productDdb,
+      Key: {
+        id: productID
+      }
+    }).promise()
+    if (data.Item) return data.Item as Product
+    else throw new Error('Product not found')
+  }
+
+  // criando um produto
+  async create(product: Product): Promise<Product> {
+    product.id = uuid()
+    await this.ddbClient.put({
+      TableName: this.productDdb,
+      Item: product
+    }).promise()
+
+    return product
+  }
+
+  // deletando um produto
+  async deleteProduct(productId: Product): Promise<Product> {
+    const data = await this.ddbClient.delete({
+      TableName: this.productDdb,
+      Key: {
+        id: productId
+      },
+      ReturnValues: 'ALL_OLD' // retorna o registro que existia na tabela
+    }).promise()
+    if (data.Attributes) return data.Attributes as Product
+    else throw new Error("Product not found")
+  }
+} 
