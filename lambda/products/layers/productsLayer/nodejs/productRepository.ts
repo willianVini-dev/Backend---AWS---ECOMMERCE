@@ -63,4 +63,24 @@ export class ProductRepository {
     if (data.Attributes) return data.Attributes as Product
     else throw new Error("Product not found")
   }
+
+  async updateProduct(productId: string, product: Product): Promise<Product> {
+    const data = await this.ddbClient.update({
+      TableName: this.productDdb,
+      Key: {
+        id: productId
+      },
+      ConditionExpression: 'attribute_exists(id)', // só era executar a operação de update se o registro existir 
+      ReturnValues: 'UPDATED_NEW', // retorna o que foi alterado
+      UpdateExpression: "set productName = :name, code = :code, price = :price , model = :model",
+      ExpressionAttributeValues: {
+        ":name": product.productName,
+        ":code": product.code,
+        ":price": product.price,
+        ":model": product.model
+      }
+    }).promise()
+    data.Attributes!.id = productId
+    return data.Attributes as Product
+  }
 } 
