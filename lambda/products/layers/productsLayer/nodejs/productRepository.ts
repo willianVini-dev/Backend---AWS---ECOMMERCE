@@ -52,7 +52,7 @@ export class ProductRepository {
   }
 
   // deletando um produto
-  async deleteProduct(productId: Product): Promise<Product> {
+  async deleteProduct(productId: string): Promise<Product> {
     const data = await this.ddbClient.delete({
       TableName: this.productDdb,
       Key: {
