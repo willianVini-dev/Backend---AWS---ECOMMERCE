@@ -29,7 +29,7 @@ export class ProductRepository {
   }
 
   // realizando a busca pelo id do produto
-  async gerproductById(productID: string): Promise<Product> {
+  async getProductById(productID: string): Promise<Product> {
     const data = await this.ddbClient.get({
       TableName: this.productDdb,
       Key: {
