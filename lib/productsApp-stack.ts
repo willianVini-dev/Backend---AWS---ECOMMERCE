@@ -31,7 +31,7 @@ export class ProductsAppStack extends cdk.Stack {
 
     //products layer 
     //recuperando o valor do layer 
-    const productsLayerArn = ssm.StringParameter.valueForStringParameter(this, "ProductslayerVersionArn")
+    const productsLayerArn = ssm.StringParameter.valueForStringParameter(this, "ProductsLayerVersionArn")
     // mesmo recurso criado no productsApplayers, passando via parametro
     const productsLayer = lambda.LayerVersion.fromLayerVersionArn(this, "ProductsLayerVersionArn",productsLayerArn)
 
