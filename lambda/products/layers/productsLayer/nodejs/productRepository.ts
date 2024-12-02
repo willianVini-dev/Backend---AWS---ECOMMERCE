@@ -7,6 +7,7 @@ export interface Product {
   code: string;
   price: string;
   model: string;
+  productUrl: string;
 }
 
 export class ProductRepository {
@@ -72,12 +73,13 @@ export class ProductRepository {
       },
       ConditionExpression: 'attribute_exists(id)', // só era executar a operação de update se o registro existir 
       ReturnValues: 'UPDATED_NEW', // retorna o que foi alterado
-      UpdateExpression: "set productName = :name, code = :code, price = :price , model = :model",
+      UpdateExpression: "set productName = :n, code = :c, price = :p , model = :m, productUrl = :u",
       ExpressionAttributeValues: {
-        ":name": product.productName,
-        ":code": product.code,
-        ":price": product.price,
-        ":model": product.model
+        ":n": product.productName,
+        ":c": product.code,
+        ":p": product.price,
+        ":m": product.model,
+        ":u": product.productUrl,
       }
     }).promise()
     data.Attributes!.id = productId

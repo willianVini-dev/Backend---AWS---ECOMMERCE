@@ -1,6 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Product, ProductRepository } from "/opt/nodejs/productsLayer";
 import { DynamoDB } from "aws-sdk";
+import *  as AWSRay from "aws-xray-sdk"
+
+AWSRay.captureAWS(require('aws-sdk'))
+
 
 // Definindo a tabela do DynamoDB via variável de ambiente (setada dentro da stack)
 const productsDdb = process.env.PRODUCTS_DDB!;
@@ -57,6 +61,7 @@ export async function handler(event: APIGatewayProxyEvent, context: Context): Pr
           body: JSON.stringify(productUpdate)
         };
       } catch (ConditionalCheckFailedException) {
+        console.log('ConditionalCheckFailedException >>> ', ConditionalCheckFailedException)
         return {
           statusCode: 404,
           body: 'Product not found'

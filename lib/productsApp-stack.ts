@@ -52,7 +52,8 @@ export class ProductsAppStack extends cdk.Stack {
         environment: {
           PRODUCTS_DDB: this.productsDdb.tableName
         },
-        layers: [productsLayer]                            // instruindo a function que poderá ter um layer
+        layers: [productsLayer],                           // instruindo a function que poderá ter um layer
+        tracing: lambda.Tracing.ACTIVE                     // ativando o x-ray na function
       }
     )
 
@@ -74,7 +75,8 @@ export class ProductsAppStack extends cdk.Stack {
         environment: {
           PRODUCTS_DDB: this.productsDdb.tableName
         },
-        layers:[productsLayer]                             // instruindo a function que poderá ter um layer
+        layers:[productsLayer],                            // instruindo a function que poderá ter um layer
+        tracing: lambda.Tracing.ACTIVE                     // ativando o x-ray na function
       }
     )
 
