@@ -1,9 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { Product, ProductRepository } from "/opt/nodejs/productsLayer";
 import { DynamoDB } from "aws-sdk";
-import *  as AWSXRay from "aws-xray-sdk"
 
-AWSXRay.captureAWS(require('aws-sdk'))
 
 
 // Definindo a tabela do DynamoDB via variável de ambiente (setada dentro da stack)

@@ -33,7 +33,7 @@ export class ProductsAppStack extends cdk.Stack {
     //recuperando o valor do layer 
     const productsLayerArn = ssm.StringParameter.valueForStringParameter(this, "ProductsLayerVersionArn")
     // mesmo recurso criado no productsApplayers, passando via parametro
-    const productsLayer = lambda.LayerVersion.fromLayerVersionArn(this, "ProductsLayerVersionArn",productsLayerArn)
+    const productsLayer = lambda.LayerVersion.fromLayerVersionArn(this, "ProductsLayerVersionArn", productsLayerArn)
 
 
     this.productsFetchHandler = new lambdaNodeJs.NodejsFunction(this,
@@ -46,14 +46,15 @@ export class ProductsAppStack extends cdk.Stack {
         timeout: cdk.Duration.seconds(5),                  // tempo maximo de execução
         bundling: {
           minify: true,                                    // minificando o arquivo bruto para fazer o deploy
-          sourceMap: false                                 // desabilita o debug
+          sourceMap: false,                                // desabilita o debug
         },
         runtime: lambda.Runtime.NODEJS_20_X,               // a partir da versão 20 do node essa config é obrigatoria
         environment: {
           PRODUCTS_DDB: this.productsDdb.tableName
         },
         layers: [productsLayer],                           // instruindo a function que poderá ter um layer
-        tracing: lambda.Tracing.ACTIVE                     // ativando o x-ray na function
+        tracing: lambda.Tracing.ACTIVE,                    // ativando o x-ray na function
+        insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0 // habilitando insights
       }
     )
 
@@ -69,14 +70,15 @@ export class ProductsAppStack extends cdk.Stack {
         timeout: cdk.Duration.seconds(5),                  // tempo maximo de execução
         bundling: {
           minify: true,                                    // minificando o arquivo bruto para fazer o deploy
-          sourceMap: false                                 // desabilita o debug
+          sourceMap: false,                                // desabilita o debug
         },
         runtime: lambda.Runtime.NODEJS_20_X,               // a partir da versão 20 do node essa config é obrigatoria
         environment: {
           PRODUCTS_DDB: this.productsDdb.tableName
         },
-        layers:[productsLayer],                            // instruindo a function que poderá ter um layer
-        tracing: lambda.Tracing.ACTIVE                     // ativando o x-ray na function
+        layers: [productsLayer],                            // instruindo a function que poderá ter um layer
+        tracing: lambda.Tracing.ACTIVE,                     // ativando o x-ray na function
+        insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0 // habilitando insights
       }
     )
 

@@ -1,9 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { ProductRepository } from "/opt/nodejs/productsLayer";
 import { DynamoDB } from "aws-sdk";
-import *  as AWSXRay from "aws-xray-sdk"
 
-AWSXRay.captureAWS(require('aws-sdk'))
 
 // Variável de ambiente que contém o nome da tabela do DynamoDB
 // Esta variável é definida na configuração da stack (como CloudFormation ou Serverless Framework)
