@@ -5,6 +5,10 @@ import { Construct } from "constructs"
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as ssm from "aws-cdk-lib/aws-ssm"
 
+
+interface ProductsAppStackProps extends cdk.StackProps {
+  eventsDdb: dynamodb.Table
+}
 export class ProductsAppStack extends cdk.Stack {
 
   // create function lambda
@@ -12,7 +16,7 @@ export class ProductsAppStack extends cdk.Stack {
   readonly productsAdminhandler: lambdaNodeJs.NodejsFunction
   readonly productsDdb: dynamodb.Table
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: ProductsAppStackProps) {
     super(scope, id, props)
 
     // criação da tabela de produtos no dynamodb
@@ -35,6 +39,34 @@ export class ProductsAppStack extends cdk.Stack {
     // mesmo recurso criado no productsApplayers, passando via parametro
     const productsLayer = lambda.LayerVersion.fromLayerVersionArn(this, "ProductsLayerVersionArn", productsLayerArn)
 
+    //products events layer 
+    //recuperando o valor do layer 
+    const productsEventsLayerArn = ssm.StringParameter.valueForStringParameter(this, "ProductsEventsLayerVersionArn")
+    // mesmo recurso criado no productsApplayers, passando via parametro
+    const productsEventsLayer = lambda.LayerVersion.fromLayerVersionArn(this, "ProductsEventsLayerVersionArn", productsEventsLayerArn)
+
+
+    const productEventsHandler = new lambdaNodeJs.NodejsFunction(this,
+      "ProductsEventsFunction",
+      {
+        functionName: "ProductsEventsFunction",             // nome da function que vai aparecer na AWS
+        entry: "lambda/products/productsEventsFunction.ts", // arquivo que essa function vai executar
+        handler: "handler",                                // metodo que vai ser executado
+        memorySize: 512,                                   // memoria maxima alocada para essa função 
+        timeout: cdk.Duration.seconds(2),                  // tempo maximo de execução
+        bundling: {
+          minify: true,                                    // minificando o arquivo bruto para fazer o deploy
+          sourceMap: false,                                // desabilita o debug
+        },
+        runtime: lambda.Runtime.NODEJS_20_X,               // a partir da versão 20 do node essa config é obrigatoria
+        environment: {
+          EVENTS_DDB: props.eventsDdb.tableName
+        },
+        layers:[productsEventsLayer],
+        insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0 // habilitando insights
+      }
+    )
+    props.eventsDdb.grantWriteData(productEventsHandler)  // da permissão de escrita para a tabela
 
     this.productsFetchHandler = new lambdaNodeJs.NodejsFunction(this,
       "ProductsFetchFunction",
@@ -53,7 +85,6 @@ export class ProductsAppStack extends cdk.Stack {
           PRODUCTS_DDB: this.productsDdb.tableName
         },
         layers: [productsLayer],                           // instruindo a function que poderá ter um layer
-        tracing: lambda.Tracing.ACTIVE,                    // ativando o x-ray na function
         insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0 // habilitando insights
       }
     )
@@ -74,15 +105,16 @@ export class ProductsAppStack extends cdk.Stack {
         },
         runtime: lambda.Runtime.NODEJS_20_X,               // a partir da versão 20 do node essa config é obrigatoria
         environment: {
-          PRODUCTS_DDB: this.productsDdb.tableName
+          PRODUCTS_DDB: this.productsDdb.tableName,
+          PRODUCTS_EVENTS_FUNCTION_NAME: productEventsHandler.functionName // passando o nome da function de eventos por variavel de ambiente
         },
-        layers: [productsLayer],                            // instruindo a function que poderá ter um layer
-        tracing: lambda.Tracing.ACTIVE,                     // ativando o x-ray na function
+        layers: [productsLayer,productsEventsLayer],                       // instruindo a function que poderá ter um layer
         insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_119_0 // habilitando insights
       }
     )
 
     this.productsDdb.grantWriteData(this.productsAdminhandler) // da permissão de escrita para a tabela
+    productEventsHandler.grantInvoke(this.productsAdminhandler) // dando permissão para a function admin acessar afunção de eventos
 
 
   }

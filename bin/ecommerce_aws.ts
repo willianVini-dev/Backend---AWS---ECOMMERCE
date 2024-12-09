@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { ProductsAppStack } from '../lib/productsApp-stack'
 import { EcommerceApiStack } from '../lib/ecommerceApi-stack'
 import { ProductsAppLayerStack } from '../lib/productsAppLayers-stack';
+import { EventsDdbStack } from '../lib/eventsDdb-stack';
 
 const app = new cdk.App();
 
@@ -18,17 +19,26 @@ const tags = {
 }
 
 
-const productsAppLayersStack = new ProductsAppLayerStack(app, "ProductsAppLayers",{
+const productsAppLayersStack = new ProductsAppLayerStack(app, "ProductsAppLayers", {
+  tags,
+  env
+})
+
+
+const eventsDdbStack = new EventsDdbStack(app, 'EventsStack', {
   tags,
   env
 })
 
 const productsAppStack = new ProductsAppStack(app, "ProductsApp", {
+  eventsDdb: eventsDdbStack.table,
   tags,
   env
 })
+
 // deixando explicito que um stack depende da outra
 productsAppStack.addDependency(productsAppLayersStack)
+productsAppStack.addDependency(eventsDdbStack)
 
 const ecommerceApiStack = new EcommerceApiStack(app, "EcommerceApi", {
   productsFetchHandler: productsAppStack.productsFetchHandler,

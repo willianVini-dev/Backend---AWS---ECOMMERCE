@@ -3,7 +3,7 @@ import { Construct } from 'constructs'
 import * as dynamoDb from 'aws-cdk-lib/aws-dynamodb'
 
 // Define a classe EventDdbStack, que representa uma pilha no AWS CDK
-export class EventDdbStack extends cdk.Stack {
+export class EventsDdbStack extends cdk.Stack {
   // Declara uma propriedade somente leitura que armazenará a tabela do DynamoDB
   readonly table: dynamoDb.Table;
 
