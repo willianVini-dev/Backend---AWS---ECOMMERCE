@@ -8,6 +8,7 @@ export interface ProductEvent {
   requestId: string;
   eventType: ProdutEventType;
   productId: string;
+  productCode: string;
   productPrice: number;
   email: string;
 }

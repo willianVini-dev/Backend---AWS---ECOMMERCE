@@ -49,8 +49,8 @@ export class ProductsAppStack extends cdk.Stack {
     const productEventsHandler = new lambdaNodeJs.NodejsFunction(this,
       "ProductsEventsFunction",
       {
-        functionName: "ProductsEventsFunction",             // nome da function que vai aparecer na AWS
-        entry: "lambda/products/productsEventsFunction.ts", // arquivo que essa function vai executar
+        functionName: "ProductsEventsFunction",            // nome da function que vai aparecer na AWS
+        entry: "lambda/products/productsEventsFunction.ts",// arquivo que essa function vai executar
         handler: "handler",                                // metodo que vai ser executado
         memorySize: 512,                                   // memoria maxima alocada para essa função 
         timeout: cdk.Duration.seconds(2),                  // tempo maximo de execução
